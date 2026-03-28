@@ -1,0 +1,730 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIVA — Trợ lý gia đình thông minh | AI điều khiển máy tính bằng giọng nói</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#ffffff;
+  --card-bg:#ffffff;
+  --card-bg2:#fafafa;
+  --primary:#10b981;
+  --primary-dark:#059669;
+  --primary-glow:rgba(16,185,129,0.15);
+  --primary-pale:rgba(16,185,129,0.05);
+  --secondary:#3b82f6;
+  --accent:#8b5cf6;
+  --border:#eef2f6;
+  --border-dark:#e2e8f0;
+  --text-light:#1e293b;
+  --text-mid:#475569;
+  --text-dim:#94a3b8;
+}
+
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text-light);
+  overflow-x:hidden;
+  cursor:default;
+  line-height:1.5;
+}
+
+/* ── CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:10px}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 6%;height:70px;
+  background:rgba(255,255,255,0.98);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:all .3s;
+  box-shadow:0 1px 0 rgba(0,0,0,0.02);
+}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-mark{
+  width:40px;height:40px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  box-shadow:0 0 20px var(--primary-glow);
+  color:white;
+}
+.logo-type{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:24px;font-weight:700;
+  color:var(--text-light);
+  letter-spacing:-0.5px;
+}
+.logo-type span{color:var(--primary);font-weight:800}
+.nav-right{display:flex;align-items:center;gap:36px}
+.nav-link{
+  font-size:14px;font-weight:500;
+  color:var(--text-mid);
+  text-decoration:none;
+  transition:color .2s;
+}
+.nav-link:hover{color:var(--primary)}
+.nav-btn{
+  background:transparent;
+  border:1px solid var(--primary);
+  border-radius:40px;
+  padding:8px 24px;
+  font-size:13px;font-weight:500;
+  color:var(--primary);
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  transition:all .25s;
+}
+.nav-btn:hover{
+  background:var(--primary);
+  color:white;
+  box-shadow:0 0 20px var(--primary-glow);
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:100px 6% 80px;
+  position:relative;z-index:2;
+  background:linear-gradient(180deg, #ffffff 0%, #fafcff 100%);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  border:1px solid var(--border-dark);
+  border-radius:40px;
+  padding:8px 24px;
+  font-size:12px;font-weight:500;
+  color:var(--primary);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:40px;
+  background:var(--primary-pale);
+  opacity:0;
+  animation:riseUp .8s ease .1s forwards;
+}
+.eyebrow-dot{
+  width:6px;height:6px;background:var(--primary);border-radius:50%;
+  box-shadow:0 0 8px var(--primary);animation:dotPulse 2s infinite
+}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 8px var(--primary)}50%{box-shadow:0 0 20px var(--primary)}}
+.hero-h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(48px,8vw,88px);
+  font-weight:700;
+  line-height:1.05;
+  letter-spacing:-2px;
+  margin-bottom:28px;
+  max-width:900px;
+  opacity:0;
+  animation:riseUp .9s ease .25s forwards;
+  color:var(--text-light);
+}
+.hero-h1 .accent{
+  color:var(--primary);
+  background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.desktop-sub{
+  font-size:18px;font-weight:400;
+  color:var(--text-mid);
+  margin:0 auto 52px;
+  opacity:0;
+  animation:riseUp .9s ease .4s forwards;
+  max-width:600px;
+}
+.hero-actions{
+  display:flex;gap:20px;justify-content:center;flex-wrap:wrap;
+  opacity:0;
+  animation:riseUp .9s ease .55s forwards;
+}
+.btn-main{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;
+  padding:16px 42px;border-radius:60px;
+  font-size:15px;font-weight:600;
+  border:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:12px;
+  font-family:'Inter',sans-serif;
+  box-shadow:0 4px 20px var(--primary-glow);
+  transition:all .3s;
+}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 8px 30px var(--primary-glow);}
+.btn-ghost{
+  background:transparent;color:var(--text-mid);
+  padding:16px 36px;border-radius:60px;
+  font-size:15px;font-weight:500;
+  border:1px solid var(--border-dark);cursor:pointer;
+  display:inline-flex;align-items:center;gap:10px;
+  transition:all .25s;
+}
+.btn-ghost:hover{color:var(--primary);border-color:var(--primary);}
+.scroll-hint{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:riseUp .9s ease 1.2s forwards;
+}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--primary),transparent);animation:scrollDrop 2s ease-in-out infinite}
+@keyframes scrollDrop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ── FEATURES ── */
+.features{padding:100px 6%;position:relative;z-index:2;background:white}
+.section-label{
+  font-size:12px;font-weight:500;
+  color:var(--primary);
+  letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--border-dark),transparent);max-width:80px}
+.section-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(32px,5vw,48px);
+  font-weight:600;
+  margin-bottom:20px;
+  letter-spacing:-1px;
+  color:var(--text-light);
+}
+.section-desc{
+  font-size:16px;color:var(--text-mid);
+  max-width:600px;margin-bottom:48px;
+}
+.feat-layout{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+  max-width:1300px;margin:0 auto;
+}
+.feat-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:32px 28px;
+  transition:all .3s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.02);
+}
+.feat-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--primary);
+  box-shadow:0 20px 40px rgba(0,0,0,0.05);
+}
+.feat-icon{
+  width:56px;height:56px;
+  background:var(--primary-pale);
+  border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  margin-bottom:24px;
+  color:var(--primary);
+}
+.feat-h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:22px;font-weight:600;
+  margin-bottom:12px;
+  letter-spacing:-0.3px;
+  color:var(--text-light);
+}
+.feat-p{font-size:14px;font-weight:400;color:var(--text-mid);line-height:1.7}
+
+/* ── 3-STEP PROCESS ── */
+.process-section{
+  padding:0 6% 100px;
+  background:white;
+  position:relative;z-index:2;
+}
+.process-steps{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+  max-width:1200px;
+  margin:48px auto 0;
+}
+.process-step{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:32px 24px;
+  text-align:center;
+  position:relative;
+  transition:all .3s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.02);
+}
+.process-step:hover{
+  transform:translateY(-4px);
+  border-color:var(--primary);
+  box-shadow:0 12px 24px rgba(0,0,0,0.05);
+}
+.process-step:not(:last-child)::after{
+  content:'→';
+  position:absolute;
+  right:-20px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:28px;
+  color:var(--primary);
+  font-weight:bold;
+}
+@media(max-width:900px){
+  .process-steps{grid-template-columns:1fr}
+  .process-step:not(:last-child)::after{display:none}
+}
+.step-num{
+  width:48px;height:48px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:22px;
+  margin:0 auto 20px;
+  color:white;
+}
+.step-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:20px;font-weight:600;
+  margin-bottom:12px;
+  color:var(--text-light);
+}
+.step-desc{font-size:14px;color:var(--text-mid);line-height:1.6}
+
+/* ── DOWNLOAD SECTION ── */
+.download-section{
+  padding:0 6% 100px;
+  position:relative;z-index:2;
+  background:white;
+}
+.download-card{
+  background:linear-gradient(135deg, #ffffff 0%, #fafcff 100%);
+  border:1px solid var(--border);
+  border-radius:48px;
+  padding:60px 48px;
+  text-align:center;
+  max-width:1000px;
+  margin:0 auto;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.04);
+}
+.download-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:radial-gradient(circle at 30% 20%, rgba(16,185,129,0.03), transparent);
+  pointer-events:none;
+}
+.download-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--primary-pale);
+  border:1px solid var(--border-dark);
+  border-radius:60px;
+  padding:8px 20px;
+  font-size:12px;font-weight:500;
+  color:var(--primary);
+  margin-bottom:32px;
+}
+.download-h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(36px,5vw,56px);
+  font-weight:600;
+  line-height:1.1;
+  margin-bottom:20px;
+  color:var(--text-light);
+}
+.download-h2 span{color:var(--primary)}
+.download-desc{
+  font-size:16px;
+  color:var(--text-mid);
+  max-width:500px;
+  margin:0 auto 36px;
+}
+.zip-btn{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;
+  padding:18px 48px;
+  border-radius:60px;
+  font-size:17px;font-weight:600;
+  border:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:12px;
+  margin-bottom:28px;
+  transition:all .3s;
+  box-shadow:0 4px 20px var(--primary-glow);
+}
+.zip-btn:hover{transform:scale(1.02);box-shadow:0 8px 40px var(--primary-glow);}
+.version-info{
+  font-size:13px;color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;gap:24px;
+  flex-wrap:wrap;
+}
+
+/* ── DEMO SECTION ── */
+.demo-section{
+  padding:0 6% 100px;
+  background:white;
+}
+.demo-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:32px;
+  padding:40px;
+  max-width:900px;
+  margin:0 auto;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.02);
+}
+.demo-command{
+  background:#f8fafc;
+  border-radius:20px;
+  padding:20px 24px;
+  margin:24px 0;
+  font-family:'Monaco',monospace;
+  font-size:14px;
+  color:var(--primary);
+  border:1px solid var(--border);
+}
+.demo-command i{color:var(--text-mid);margin-right:12px}
+.code-block{
+  background:#f8fafc;
+  border-radius:16px;
+  padding:16px 20px;
+  text-align:left;
+  font-family:'Monaco',monospace;
+  font-size:13px;
+  color:var(--text-mid);
+  margin-top:16px;
+  border:1px solid var(--border);
+}
+.code-block span{color:var(--primary)}
+
+/* ── AUTHOR ── */
+.author-section{
+  padding:0 6% 100px;
+  background:white;
+}
+.author-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:32px;
+  padding:48px;
+  max-width:800px;
+  margin:0 auto;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.02);
+}
+.author-name{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:28px;font-weight:600;
+  margin-bottom:8px;
+  color:var(--text-light);
+}
+.author-name i{color:var(--primary);margin-right:8px}
+.author-title{font-size:13px;color:var(--primary);letter-spacing:1px;margin-bottom:20px}
+.author-contact{
+  display:flex;justify-content:center;gap:32px;flex-wrap:wrap;
+  margin:24px 0 20px;
+}
+.contact-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;color:var(--text-mid);
+  text-decoration:none;
+  transition:color .2s;
+}
+.contact-item:hover{color:var(--primary)}
+.tech-stack{
+  display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+  margin-top:24px;
+}
+.tech-badge{
+  background:#f8fafc;
+  padding:6px 16px;
+  border-radius:40px;
+  font-size:12px;
+  color:var(--text-mid);
+  border:1px solid var(--border);
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:48px 6% 32px;
+  background:white;
+}
+.footer-inner{
+  max-width:1200px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;
+  gap:20px;
+}
+.footer-links{display:flex;gap:32px;flex-wrap:wrap}
+.footer-links a{color:var(--text-dim);text-decoration:none;font-size:13px}
+.footer-links a:hover{color:var(--primary)}
+.footer-copyright{font-size:12px;color:var(--text-dim)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .feat-layout{grid-template-columns:1fr}
+  .nav-right .nav-link{display:none}
+  .download-card{padding:40px 24px}
+}
+@media(max-width:600px){
+  .hero-h1{font-size:44px}
+  .author-contact{gap:16px;flex-direction:column;align-items:center}
+  .footer-inner{flex-direction:column;text-align:center}
+  .hero{padding-top:80px}
+  .btn-main,.btn-ghost{padding:14px 28px}
+}
+
+/* animation */
+@keyframes riseUp{
+  from{opacity:0;transform:translateY(22px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.rise{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.rise.in{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#" class="logo">
+    <div class="logo-mark"><i class="fas fa-brain"></i></div>
+    <div class="logo-type">AIVA<span>.</span></div>
+  </a>
+  <div class="nav-right">
+    <a href="#features" class="nav-link"><i class="fas fa-cogs"></i> Tính năng</a>
+    <a href="#process" class="nav-link"><i class="fas fa-chart-line"></i> Quy trình</a>
+    <a href="#author" class="nav-link"><i class="fas fa-user"></i> Tác giả</a>
+    <button class="nav-btn" id="downloadNavBtn"><i class="fas fa-download"></i> Tải AIVA.zip</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">
+    <div class="eyebrow-dot"></div>
+    <i class="fas fa-robot"></i> TRỢ LÝ GIA ĐÌNH THÔNG MINH
+  </div>
+  <h1 class="hero-h1">
+    AIVA<br>
+    <span class="accent">Trợ lý AI</span> cho mọi nhà
+  </h1>
+  <div class="desktop-sub">
+    <i class="fas fa-microphone-alt"></i> Điều khiển máy tính bằng giọng nói · Vision AI · RAG thông minh
+  </div>
+  <div class="hero-actions">
+    <button class="btn-main" id="downloadHeroBtn">
+      <i class="fas fa-download"></i> Tải AIVA.zip
+    </button>
+    <a href="#process" class="btn-ghost">
+      <i class="fas fa-play-circle"></i> Xem cách hoạt động
+    </a>
+  </div>
+  <div class="scroll-hint">
+    <span style="font-size:12px;color:var(--text-dim)">Khám phá ngay</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="section-label rise"><i class="fas fa-star"></i> Tính năng nổi bật</div>
+  <h2 class="section-title rise">Mọi thứ bạn cần<br>trong một trợ lý</h2>
+  <p class="section-desc rise">AIVA không chỉ là trợ lý ảo — cô ấy hiểu, nhìn và hành động như một người trợ lý thực thụ.</p>
+  <div class="feat-layout">
+    <div class="feat-card rise">
+      <div class="feat-icon"><i class="fas fa-microphone-alt"></i></div>
+      <h3 class="feat-h3">Điều khiển bằng giọng nói</h3>
+      <p class="feat-p">Nói tự nhiên bằng tiếng Việt — AIVA hiểu, phân tích và thực hiện hành động trên máy tính của bạn.</p>
+    </div>
+    <div class="feat-card rise">
+      <div class="feat-icon"><i class="fas fa-eye"></i></div>
+      <h3 class="feat-h3">Vision AI · Nhìn màn hình</h3>
+      <p class="feat-p">GPT-4o mini nhận diện giao diện, từ đó quyết định click, gõ văn bản, mở ứng dụng chính xác đến từng pixel.</p>
+    </div>
+    <div class="feat-card rise">
+      <div class="feat-icon"><i class="fas fa-brain"></i></div>
+      <h3 class="feat-h3">RAG & Bộ nhớ thông minh</h3>
+      <p class="feat-p">Bộ nhớ dài hạn + ngắn hạn, truy xuất kiến thức bằng vector embedding. AI nhớ những gì bạn đã dạy.</p>
+    </div>
+    <div class="feat-card rise">
+      <div class="feat-icon"><i class="fas fa-pen-fancy"></i></div>
+      <h3 class="feat-h3">AI Write · Soạn thảo văn bản</h3>
+      <p class="feat-p">Viết email, báo cáo, đơn từ chuyên nghiệp với Gemini + RAG từ kiến thức soạn thảo riêng.</p>
+    </div>
+    <div class="feat-card rise">
+      <div class="feat-icon"><i class="fas fa-mobile-alt"></i></div>
+      <h3 class="feat-h3">Điều khiển từ xa</h3>
+      <p class="feat-p">Dùng điện thoại truy cập giao diện remote, ra lệnh từ xa — AIVA thực thi trên máy tính chính.</p>
+    </div>
+    <div class="feat-card rise">
+      <div class="feat-icon"><i class="fas fa-microchip"></i></div>
+      <h3 class="feat-h3">Module gạt · IoT</h3>
+      <p class="feat-p">Điều khiển thiết bị vật lý (servo, ESP32) qua WiFi. Tự động hóa không gian sống của bạn.</p>
+    </div>
+  </div>
+</section>
+
+<section class="process-section" id="process">
+  <div class="section-label rise"><i class="fas fa-chart-line"></i> Quy trình 3 bước</div>
+  <h2 class="section-title rise">AI suy nghĩ & hành động<br>như con người</h2>
+  <div class="process-steps">
+    <div class="process-step rise">
+      <div class="step-num">1</div>
+      <div class="step-title"><i class="fas fa-camera"></i> Nhìn màn hình</div>
+      <div class="step-desc">GPT-4o mini phân tích giao diện, nhận diện ứng dụng, vị trí con trỏ, ô nhập liệu đang focus.</div>
+    </div>
+    <div class="process-step rise">
+      <div class="step-num">2</div>
+      <div class="step-title"><i class="fas fa-list-check"></i> Lập kế hoạch</div>
+      <div class="step-desc">Groq LLM kết hợp bộ nhớ + template → tạo yêu cầu chi tiết, từng bước một.</div>
+    </div>
+    <div class="process-step rise">
+      <div class="step-num">3</div>
+      <div class="step-title"><i class="fas fa-bolt"></i> Thực thi Macro</div>
+      <div class="step-desc">Tự động click, gõ phím, mở ứng dụng, điều khiển thiết bị — hoàn toàn tự động.</div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="demo-card rise">
+    <div class="feat-icon" style="margin:0 auto 20px"><i class="fas fa-comment-dots"></i></div>
+    <h3 style="font-size:24px;margin-bottom:12px;color:var(--text-light)">Ví dụ lệnh bạn có thể nói</h3>
+    <div class="demo-command">
+      <i class="fas fa-microphone"></i> "Gửi mail xin nghỉ phép giúp tôi"
+    </div>
+    <div class="demo-command">
+      <i class="fas fa-microphone"></i> "Mở Google và tìm kiếm lịch sử Việt Nam"
+    </div>
+    <div class="demo-command">
+      <i class="fas fa-microphone"></i> "Nhớ giúp tôi email của Chương là duychuong@test.com"
+    </div>
+    <div class="code-block">
+      <span>→ AIVA sẽ:</span> Chụp màn hình → Phân tích → Lập kế hoạch → Mở trình duyệt → Điền thông tin → Gửi mail
+    </div>
+  </div>
+</section>
+
+<section class="download-section" id="download">
+  <div class="download-card rise">
+    <div class="download-badge">
+      <i class="fas fa-code-branch"></i> Hoàn toàn miễn phí · Mã nguồn mở
+    </div>
+    <h2 class="download-h2">
+      Tải ngay <span>AIVA.zip</span><br>
+      và trải nghiệm ngay hôm nay
+    </h2>
+    <p class="download-desc">
+      <i class="fab fa-windows"></i> Windows 10/11 · Cài đặt nhanh 2 phút · Hỗ trợ cả local LLM
+    </p>
+    <button class="zip-btn" id="downloadZipBtn">
+      <i class="fas fa-file-archive"></i> Tải AIVA.zip (full source)
+    </button>
+    <div class="version-info">
+      <span><i class="fas fa-tag"></i> Phiên bản: 2.0.0</span>
+      <span><i class="fas fa-database"></i> Dung lượng: ~42 MB</span>
+      <span><i class="fab fa-python"></i> Python 3.9+</span>
+      <span><i class="fas fa-key"></i> F6: Dừng khẩn cấp</span>
+    </div>
+  </div>
+</section>
+
+<section class="author-section" id="author">
+  <div class="author-card rise">
+    <div class="author-name"><i class="fas fa-user-astronaut"></i> Hoàng Minh Tuấn</div>
+    <div class="author-title">Tác giả & Kiến trúc sư của AIVA</div>
+    <p style="font-size:14px;color:var(--text-mid);max-width:500px;margin:0 auto 24px">
+      Xây dựng AIVA với sứ mệnh đưa trí tuệ nhân tạo đến gần hơn với mọi gia đình Việt. Tự động hóa thông minh, điều khiển bằng ngôn ngữ tự nhiên — AIVA là người bạn đồng hành đáng tin cậy.
+    </p>
+    <div class="author-contact">
+      <a href="tel:0796545052" class="contact-item"><i class="fas fa-phone-alt"></i> 0796 545 052</a>
+      <a href="mailto:hoangminhtuan09032009@gmail.com" class="contact-item"><i class="fas fa-envelope"></i> hoangminhtuan09032009@gmail.com</a>
+    </div>
+    <div class="tech-stack">
+      <span class="tech-badge"><i class="fab fa-python"></i> Python · WebSocket</span>
+      <span class="tech-badge"><i class="fas fa-robot"></i> GPT-4o · Groq · Gemini</span>
+      <span class="tech-badge"><i class="fas fa-brain"></i> RAG + Embeddings</span>
+      <span class="tech-badge"><i class="fas fa-microchip"></i> ESP32 · Servo</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-copyright"><i class="far fa-copyright"></i> 2026 AIVA — Hoàng Minh Tuấn</div>
+    <div class="footer-links">
+      <a href="#"><i class="fab fa-github"></i> GitHub</a>
+      <a href="#"><i class="fas fa-book-open"></i> Tài liệu hướng dẫn</a>
+      <a href="#"><i class="fas fa-balance-scale"></i> MIT License</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function triggerDownloadZip() {
+    const link = document.createElement('a');
+    link.href = 'aiva.zip';
+    link.download = 'aiva.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast();
+  }
+
+  function showToast() {
+    const toast = document.createElement('div');
+    toast.innerHTML = '<i class="fas fa-check-circle"></i> Đang tải AIVA.zip...';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.background = '#10b981';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '40px';
+    toast.style.fontSize = '14px';
+    toast.style.zIndex = '9999';
+    toast.style.fontWeight = '500';
+    toast.style.boxShadow = '0 4px 20px rgba(16,185,129,0.3)';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  }
+
+  const downloadBtns = ['downloadNavBtn', 'downloadHeroBtn', 'downloadZipBtn'];
+  downloadBtns.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerDownloadZip();
+    });
+  });
+
+  // SCROLL REVEAL
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e,i) => {
+      if (e.isIntersecting) setTimeout(() => e.target.classList.add('in'), i * 60);
+    });
+  }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+  document.querySelectorAll('.rise').forEach(el => obs.observe(el));
+
+  // NAV SCROLL BG
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('nav');
+    if (nav) nav.style.background = window.scrollY > 40 ? 'rgba(255,255,255,0.98)' : 'rgba(255,255,255,0.98)';
+  });
+</script>
+</body>
+</html>
