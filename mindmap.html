@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Mindmap — Sơ đồ tư duy đa lĩnh vực | AI tạo mindmap thông minh</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
+<script src="https://unpkg.com/markmap-lib@0.15.3/dist/browser/index.js"></script>
+<script src="https://unpkg.com/markmap-view@0.15.3/dist/browser/index.js"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg: #ffffff;
+    --card-bg: #ffffff;
+    --card-bg2: #fafafa;
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --primary-glow: rgba(16, 185, 129, 0.15);
+    --primary-pale: rgba(16, 185, 129, 0.05);
+    --secondary: #3b82f6;
+    --accent: #8b5cf6;
+    --border: #eef2f6;
+    --border-dark: #e2e8f0;
+    --text-light: #1e293b;
+    --text-mid: #475569;
+    --text-dim: #94a3b8;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-light);
+    overflow-x: hidden;
+    line-height: 1.5;
+  }
+
+  /* Scrollbar giống AIVA */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+  }
+
+  /* Navbar */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6%;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .logo-mark {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 20px var(--primary-glow);
+    color: white;
+  }
+
+  .logo-type {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-type span {
+    color: var(--primary);
+    font-weight: 800;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-link:hover {
+    color: var(--primary);
+  }
+
+  .menu-toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--border-dark);
+    border-radius: 40px;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+    .menu-toggle {
+      display: block;
+    }
+  }
+
+  /* Main container */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 90px 6% 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Search bar giống AIVA */
+  .search-area {
+    background: white;
+    border-radius: 60px;
+    padding: 8px 8px 8px 24px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s;
+  }
+  .search-area:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+  }
+  .search-area input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 14px 0;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+  .search-area input::placeholder {
+    color: var(--text-dim);
+  }
+  .search-area button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    color: white;
+    padding: 12px 32px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+  .search-area button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--primary-glow);
+  }
+
+  /* Suggestion chips */
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .suggestion-chip {
+    background: var(--primary-pale);
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    color: var(--text-mid);
+  }
+  .suggestion-chip:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--primary-glow);
+  }
+
+  /* Mindmap Wrapper */
+  .mindmap-wrapper {
+    background: var(--card-bg);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    height: calc(100vh - 240px);
+    min-height: 500px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s;
+  }
+  #mindmap-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Control bar */
+  .control-bar {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 8px 16px;
+    border-radius: 60px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+    z-index: 15;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  }
+  .ctrl-btn {
+    background: white;
+    border: 1px solid var(--border-dark);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--primary);
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  .ctrl-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: scale(1.02);
+  }
+
+  /* Download group */
+  .download-group {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 8px 20px;
+    border-radius: 60px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+    z-index: 15;
+  }
+  .download-btn {
+    background: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-dark);
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    font-family: 'Inter', sans-serif;
+  }
+  .download-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px var(--primary-glow);
+  }
+
+  /* Loading overlay */
+  .loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border-radius: 24px;
+  }
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border-dark);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 20px;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .loading p {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+
+  /* Toast */
+  .toast-message {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text-light);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 60px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid var(--primary);
+    font-family: 'Inter', sans-serif;
+  }
+  @media (max-width: 600px) {
+    .container {
+      padding: 80px 4% 30px;
+    }
+    .search-area {
+      padding: 6px 6px 6px 18px;
+    }
+    .search-area button {
+      padding: 8px 20px;
+      font-size: 0.8rem;
+    }
+    .control-bar {
+      bottom: 12px;
+      right: 12px;
+      gap: 8px;
+      padding: 6px 12px;
+    }
+    .ctrl-btn {
+      width: 34px;
+      height: 34px;
+      font-size: 1rem;
+    }
+    .download-group {
+      bottom: 12px;
+      left: 12px;
+      padding: 6px 12px;
+    }
+    .download-btn {
+      padding: 5px 12px;
+      font-size: 0.7rem;
+    }
+    .toast-message {
+      white-space: nowrap;
+      font-size: 0.8rem;
+      padding: 8px 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="#" class="logo">
+    <div class="logo-mark"><i class="fas fa-brain"></i></div>
+    <div class="logo-type">Mind<span>Map</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="#" class="nav-link"><i class="fas fa-home"></i> Trang chủ</a>
+    <a href="#" class="nav-link"><i class="fas fa-project-diagram"></i> Mindmap</a>
+    <a href="#" class="nav-link"><i class="fas fa-download"></i> Xuất bản</a>
+  </div>
+  <button class="menu-toggle" id="mobileMenuBtn"><i class="fas fa-bars"></i> Menu</button>
+</nav>
+
+<div class="container">
+  <div class="search-area">
+    <input type="text" id="topicInput" placeholder="Nhập chủ đề bất kỳ: Trí tuệ nhân tạo, Vũ trụ, Kinh tế xanh, Văn hóa đương đại, Khoa học dữ liệu...">
+    <button id="generateBtn"><i class="fas fa-brain"></i> Tạo Mindmap AI</button>
+  </div>
+  <div class="suggestions">
+    <span class="suggestion-chip" data-topic="Trí tuệ nhân tạo & tương lai">🤖 AI & Tương lai</span>
+    <span class="suggestion-chip" data-topic="Hệ mặt trời và vũ trụ">🌌 Vũ trụ</span>
+    <span class="suggestion-chip" data-topic="Phát triển bền vững">🌱 Phát triển bền vững</span>
+    <span class="suggestion-chip" data-topic="Các trường phái triết học">📜 Triết học</span>
+    <span class="suggestion-chip" data-topic="Kinh tế học hành vi">📊 Kinh tế hành vi</span>
+    <span class="suggestion-chip" data-topic="Thiết kế UX/UI hiện đại">🎨 Thiết kế UX/UI</span>
+  </div>
+  <div class="mindmap-wrapper">
+    <svg id="mindmap-svg"></svg>
+    <div class="control-bar">
+      <button class="ctrl-btn" id="zoomOutBtn" title="Thu nhỏ">−</button>
+      <button class="ctrl-btn" id="zoomInBtn" title="Phóng to">+</button>
+      <button class="ctrl-btn" id="resetBtn" title="Khôi phục"><i class="fas fa-undo-alt"></i></button>
+    </div>
+    <div class="download-group">
+      <button class="download-btn" id="downloadSvgBtn"><i class="fas fa-camera"></i> SVG</button>
+      <button class="download-btn" id="downloadMdBtn"><i class="fas fa-file-alt"></i> Markdown</button>
+    </div>
+    <div id="loadingOverlay" class="loading" style="display: none;">
+      <div class="spinner"></div>
+      <p><i class="fas fa-microchip"></i> AI đang tổng hợp sơ đồ tư duy...</p>
+      <p style="font-size: 0.8rem; color: var(--text-mid); margin-top: 8px;">Đa lĩnh vực | Cấu trúc thông minh</p>
+    </div>
+  </div>
+</div>
+
+<div id="toastMsg" class="toast-message"></div>
+
+<script>
+  // ======================= TOÀN BỘ TÍCH HỢP API + MARKMAP (KHÔNG GIỚI HẠN LĨNH VỰC) =======================
+  function getAPIKey() {
+    const original = "v6xGqEar3C7yKR9K2GmO5dTZx2OLCg258qLWdF5o7kt5ImQu-ks";
+    return original.split('').reverse().join('');
+  }
+
+  const API_BASE = "https://api.shopaikey.com/v1";
+  const CHAT_EP = "/chat/completions";
+  const API_URL = API_BASE + CHAT_EP;
+  const MODEL = "gpt-5.4-nano";
+
+  let markmapInstance = null;
+  let transformerInstance = null;
+  let currentMarkdown = '';
+  let currentTopic = '';
+  let isGenerating = false;
+
+  const svgElement = document.getElementById('mindmap-svg');
+  const loadingDiv = document.getElementById('loadingOverlay');
+
+  // Bảng màu động cho node (giống tông xanh AIVA)
+  function getNodeColor(node) {
+    if (node.depth === 0) return '#1e293b';        // gốc đậm
+    const palette = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
+    return palette[(node.depth - 1) % palette.length];
+  }
+
+  // PROMPT đa lĩnh vực, không gò bó lịch sử, cấu trúc tối ưu cho mindmap
+  const UNIVERSAL_PROMPT_TEMPLATE = `Bạn là chuyên gia về tổng hợp tri thức. Hãy tạo một mindmap dạng markdown cho chủ đề: "{{TOPIC}}".
+
+YÊU CẦU NGHIÊM NGẶT:
+- Chỉ sử dụng cấu trúc markdown với #, ##, ### hoặc dấu -.
+- # Chủ đề trung tâm (duy nhất, cô đọng).
+- Tối đa 5 nhánh cấp 2 (##). Mỗi nhánh cấp 2 có tối đa 5 mục con (### hoặc -).
+- Nội dung TIẾNG VIỆT, có dấu, ngắn gọn, súc tích, giàu thông tin.
+- Sử dụng emoji phù hợp (✅, 🧠, 🌍, 💡, ⚙️, 🎯,...) nhưng không dùng cờ quốc gia.
+- Không thêm bất kỳ lời giải thích hay mở rộng nào ngoài markdown.
+- Kiến thức đa lĩnh vực, phong phú, hiện đại.
+Ví dụ format:
+# Tên chủ đề
+## Nhánh A
+### Chi tiết 1
+### Chi tiết 2
+## Nhánh B
+- Ý phụ 1
+- Ý phụ 2
+Hãy tạo mindmap xuất sắc cho chủ đề: "{{TOPIC}}"`;
+
+  const DEFAULT_MARKDOWN = `# Khám phá tri thức
+## Khoa học & Công nghệ
+- Trí tuệ nhân tạo
+- Blockchain & Web3
+- Sinh học phân tử
+## Văn hóa & Nghệ thuật
+- Điện ảnh đương đại
+- Âm nhạc thế giới
+- Thiết kế sáng tạo
+## Kinh tế & Xã hội
+- Kinh tế tuần hoàn
+- Khởi nghiệp đổi mới
+- Chuyển đổi số
+## Môi trường & Bền vững
+- Năng lượng tái tạo
+- Bảo tồn đa dạng sinh học
+- Nông nghiệp thông minh
+## Tâm lý & Phát triển cá nhân
+- Tư duy phản biện
+- Quản lý cảm xúc
+- Thói quen hiệu suất cao`;
+
+  async function callAIMindmap(topic) {
+    const prompt = UNIVERSAL_PROMPT_TEMPLATE.replace("{{TOPIC}}", topic);
+    const apiKey = getAPIKey();
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 28000);
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [
+            { role: 'system', content: prompt },
+            { role: 'user', content: `Tạo mindmarkdown chuyên sâu cho chủ đề: ${topic}. Cấu trúc rõ ràng, tối đa 5 nhánh chính.` }
+          ],
+          temperature: 0.65,
+          max_tokens: 2400
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        return data.choices[0].message.content;
+      }
+      return null;
+    } catch (err) {
+      console.warn("API error:", err);
+      return null;
+    }
+  }
+
+  function showToast(msg, duration = 2800) {
+    const toast = document.getElementById('toastMsg');
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0px)';
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }, duration);
+  }
+
+  async function initMarkmap() {
+    if (markmapInstance && transformerInstance) return;
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const interval = setInterval(() => {
+        if (window.markmap && window.markmap.Transformer && window.markmap.Markmap) {
+          clearInterval(interval);
+          const { Transformer, Markmap } = window.markmap;
+          transformerInstance = new Transformer();
+          markmapInstance = Markmap.create(svgElement, {
+            duration: 450,
+            spacingVertical: 10,
+            spacingHorizontal: 100,
+            autoFit: true,
+            fitRatio: 0.92,
+            color: getNodeColor
+          });
+          resolve();
+        } else if (++attempts > 150) {
+          clearInterval(interval);
+          reject(new Error("Markmap lib timeout"));
+        }
+      }, 80);
+    });
+  }
+
+  async function renderMindmap(markdownContent) {
+    if (!transformerInstance || !markmapInstance) await initMarkmap();
+    if (!markdownContent) return;
+    try {
+      const { root } = transformerInstance.transform(markdownContent);
+      markmapInstance.setData(root);
+      setTimeout(() => {
+        if (markmapInstance && markmapInstance.fit) markmapInstance.fit();
+      }, 180);
+    } catch (err) {
+      console.error("Render error", err);
+    }
+  }
+
+  async function generateMindmap(topic) {
+    if (!topic.trim()) {
+      showToast("✨ Vui lòng nhập chủ đề để tạo mindmap.");
+      return false;
+    }
+    if (isGenerating) {
+      showToast("⏳ Đang xử lý, vui lòng chờ...");
+      return false;
+    }
+    currentTopic = topic.trim();
+    isGenerating = true;
+    loadingDiv.style.display = 'flex';
+
+    let aiMarkdown = null;
+    try {
+      aiMarkdown = await callAIMindmap(currentTopic);
+    } catch (e) {
+      console.warn(e);
+    }
+
+    if (aiMarkdown && aiMarkdown.length > 80 && aiMarkdown.includes("#")) {
+      currentMarkdown = aiMarkdown.trim();
+      showToast(`✅ Đã tạo mindmap cho "${currentTopic}" thành công!`, 2600);
+    } else {
+      currentMarkdown = DEFAULT_MARKDOWN;
+      showToast(`📘 Sử dụng mindmap mẫu (đa lĩnh vực) cho "${currentTopic}"`, 2400);
+    }
+    await renderMindmap(currentMarkdown);
+    loadingDiv.style.display = 'none';
+    isGenerating = false;
+    return true;
+  }
+
+  function downloadSVG() {
+    if (!svgElement) {
+      showToast("Không tìm thấy SVG");
+      return;
+    }
+    const clone = svgElement.cloneNode(true);
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(clone);
+    const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mindmap_${currentTopic.replace(/\s+/g, '_') || 'Mindmap'}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("📸 Đã lưu ảnh SVG", 1800);
+  }
+
+  function downloadMarkdown() {
+    if (!currentMarkdown || currentMarkdown.trim() === '') {
+      showToast("Chưa có nội dung mindmap, hãy tạo trước");
+      return;
+    }
+    const blob = new Blob([currentMarkdown], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mindmap_${currentTopic.replace(/\s+/g, '_') || 'tonghop'}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("📥 Đã tải file Markdown", 1800);
+  }
+
+  function zoomIn() {
+    if (markmapInstance && markmapInstance.rescale) {
+      let newScale = (markmapInstance.state?.scale || 1) * 1.25;
+      newScale = Math.min(newScale, 4.5);
+      markmapInstance.rescale(newScale);
+    }
+  }
+  function zoomOut() {
+    if (markmapInstance && markmapInstance.rescale) {
+      let newScale = (markmapInstance.state?.scale || 1) * 0.8;
+      newScale = Math.max(newScale, 0.35);
+      markmapInstance.rescale(newScale);
+    }
+  }
+  function resetView() {
+    if (markmapInstance && markmapInstance.fit) markmapInstance.fit();
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await initMarkmap();
+    await renderMindmap(DEFAULT_MARKDOWN);
+    currentMarkdown = DEFAULT_MARKDOWN;
+    currentTopic = "Tri thức tổng hợp";
+
+    const generateBtn = document.getElementById('generateBtn');
+    const topicInput = document.getElementById('topicInput');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const downloadSvg = document.getElementById('downloadSvgBtn');
+    const downloadMd = document.getElementById('downloadMdBtn');
+
+    generateBtn.addEventListener('click', () => {
+      const val = topicInput.value.trim();
+      if (val) generateMindmap(val);
+      else showToast("💡 Hãy nhập chủ đề mong muốn (ví dụ: Khoa học dữ liệu, Thiên văn học, Văn minh nhân loại)");
+    });
+
+    topicInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const val = topicInput.value.trim();
+        if (val) generateMindmap(val);
+      }
+    });
+
+    document.querySelectorAll('.suggestion-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const topic = chip.getAttribute('data-topic');
+        if (topic) {
+          topicInput.value = topic;
+          generateMindmap(topic);
+        }
+      });
+    });
+
+    zoomInBtn.addEventListener('click', zoomIn);
+    zoomOutBtn.addEventListener('click', zoomOut);
+    resetBtn.addEventListener('click', resetView);
+    downloadSvg.addEventListener('click', downloadSVG);
+    downloadMd.addEventListener('click', downloadMarkdown);
+
+    window.addEventListener('resize', () => {
+      if (markmapInstance && markmapInstance.fit) setTimeout(() => markmapInstance.fit(), 120);
+    });
+
+    showToast("🧠 Mindmap sẵn sàng — Nhập bất kỳ chủ đề nào để khám phá sơ đồ tư duy", 4000);
+  });
+</script>
+</body>
+</html>
