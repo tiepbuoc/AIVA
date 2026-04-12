@@ -44,7 +44,7 @@ body{
 ::-webkit-scrollbar-track{background:#f1f5f9}
 ::-webkit-scrollbar-thumb{background:var(--primary);border-radius:10px}
 
-/* ── NAV (GIỐNG AIVA) ── */
+/* ── NAV (THANH ĐIỀU HƯỚNG GIỐNG HỆT TRANG CHỦ VỚI 3 NÚT CHỨC NĂNG) ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
@@ -72,7 +72,53 @@ nav{
   letter-spacing:-0.5px;
 }
 .logo-type span{color:var(--primary);font-weight:800}
-.nav-right{display:flex;align-items:center;gap:36px}
+
+/* KHU VỰC CÁC NÚT CHỨC NĂNG: TRANG CHỦ, MINDMAP, CHATBOT AI */
+.nav-functions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.6);
+  padding: 4px 12px;
+  border-radius: 48px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(4px);
+}
+.func-btn {
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text-mid);
+  border: 1px solid transparent;
+}
+.func-btn i {
+  font-size: 14px;
+}
+.func-btn.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px var(--primary-glow);
+  border-color: var(--primary);
+}
+.func-btn:not(.active):hover {
+  background: var(--primary-pale);
+  color: var(--primary);
+  border-color: var(--border-dark);
+  transform: translateY(-2px);
+}
+
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap:36px
+}
 .nav-link{
   font-size:14px;font-weight:500;
   color:var(--text-mid);
@@ -95,6 +141,42 @@ nav{
   background:var(--primary);
   color:white;
   box-shadow:0 0 20px var(--primary-glow);
+}
+
+@media (max-width: 900px) {
+  .nav-right .nav-link {
+    display: none;
+  }
+  .nav-functions {
+    gap: 6px;
+    padding: 4px 8px;
+  }
+  .func-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .func-btn i {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav-functions {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 0;
+    justify-content: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  }
+  .func-btn {
+    padding: 8px 16px;
+  }
 }
 
 /* ── BỐ CỤC CHAT CHÍNH ── */
@@ -325,7 +407,6 @@ nav{
 
 /* Responsive */
 @media (max-width: 680px) {
-  .nav-right .nav-link { display: none; }
   .chat-toolbar { flex-direction: column; align-items: stretch; }
   .model-selector { justify-content: center; }
   .message-content { max-width: 85%; }
@@ -346,14 +427,27 @@ nav{
 <body>
 
 <nav id="nav">
-  <a href="#" class="logo">
+  <a href="index.html" class="logo">
     <div class="logo-mark"><i class="fas fa-brain"></i></div>
     <div class="logo-type">AI<span>.</span></div>
   </a>
+  <!-- THANH CHỨC NĂNG: TRANG CHỦ, MINDMAP, CHATBOT AI (GIỐNG HỆT TRANG CHỦ) -->
+  <div class="nav-functions">
+    <a href="index.html" class="func-btn">
+      <i class="fas fa-home"></i> Trang chủ
+    </a>
+    <a href="mindmap.html" class="func-btn">
+      <i class="fas fa-project-diagram"></i> Mindmap
+    </a>
+    <a href=".html" class="func-btn active">
+      <i class="fas fa-comment-dots"></i> Chatbot AI
+    </a>
+  </div>
   <div class="nav-right">
     <a href="#" class="nav-link" id="newChatNav"><i class="fas fa-plus-circle"></i> Hội thoại mới</a>
     <a href="#" class="nav-link" id="clearNav"><i class="fas fa-trash-alt"></i> Xóa tin nhắn</a>
     <button class="nav-btn" id="aboutBtn"><i class="fas fa-robot"></i> AI Thông Minh</button>
+    <button class="nav-btn" id="downloadNavBtn"><i class="fas fa-download"></i> Tải AIVA.zip</button>
   </div>
 </nav>
 
@@ -399,6 +493,49 @@ nav{
     const originalKey = "v6xGqEar3C7yKR9K2GmO5dTZx2OLCg258qLWdF5o7kt5ImQu-ks";
     const reversedKey = originalKey.split('').reverse().join('');
     return reversedKey;
+  }
+
+  function triggerDownloadZip() {
+    const link = document.createElement('a');
+    link.href = 'aiva.zip';
+    link.download = 'aiva.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("📦 Đang tải AIVA.zip...", 2000);
+  }
+
+  function showToast(msg, duration = 2800) {
+    let toast = document.getElementById('dynamicToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'dynamicToast';
+      toast.style.position = 'fixed';
+      toast.style.bottom = '30px';
+      toast.style.left = '50%';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+      toast.style.background = '#1e293b';
+      toast.style.color = 'white';
+      toast.style.padding = '12px 28px';
+      toast.style.borderRadius = '60px';
+      toast.style.fontSize = '0.9rem';
+      toast.style.fontWeight = '500';
+      toast.style.zIndex = '10001';
+      toast.style.opacity = '0';
+      toast.style.transition = 'all 0.3s ease';
+      toast.style.whiteSpace = 'nowrap';
+      toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+      toast.style.borderLeft = '4px solid #10b981';
+      toast.style.fontFamily = "'Inter', sans-serif";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0px)';
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(20px)';
+    }, duration);
   }
 
   const API_BASE_URL = "https://api.shopaikey.com/v1";
@@ -625,6 +762,13 @@ nav{
     document.getElementById('aboutBtn').addEventListener('click', () => {
       alert('🤖 AI Thông Minh\n\nTôi có thể trả lời tất cả mọi câu hỏi của bạn!\nKhông giới hạn lĩnh vực — từ khoa học, công nghệ, đời sống, giải trí, tư vấn đến sáng tạo nội dung.\nGiao diện lấy cảm hứng từ AIVA, mã nguồn mở.');
     });
+    const downloadNavBtn = document.getElementById('downloadNavBtn');
+    if (downloadNavBtn) {
+      downloadNavBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerDownloadZip();
+      });
+    }
     document.getElementById('userInput').focus();
   });
 </script>
