@@ -57,7 +57,7 @@
     border-radius: 10px;
   }
 
-  /* Navbar */
+  /* Navbar giống hệt trang chủ với 3 nút chức năng */
   .navbar {
     position: fixed;
     top: 0;
@@ -109,10 +109,51 @@
     font-weight: 800;
   }
 
-  .nav-links {
+  /* KHU VỰC CÁC NÚT CHỨC NĂNG: TRANG CHỦ, MINDMAP, CHATBOT AI */
+  .nav-functions {
     display: flex;
-    gap: 36px;
     align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.6);
+    padding: 4px 12px;
+    border-radius: 48px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+  }
+  .func-btn {
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text-mid);
+    border: 1px solid transparent;
+  }
+  .func-btn i {
+    font-size: 14px;
+  }
+  .func-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px var(--primary-glow);
+    border-color: var(--primary);
+  }
+  .func-btn:not(.active):hover {
+    background: var(--primary-pale);
+    color: var(--primary);
+    border-color: var(--border-dark);
+    transform: translateY(-2px);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 36px;
   }
 
   .nav-link {
@@ -130,25 +171,61 @@
     color: var(--primary);
   }
 
-  .menu-toggle {
-    display: none;
+  .nav-btn {
     background: transparent;
-    border: 1px solid var(--border-dark);
+    border: 1px solid var(--primary);
     border-radius: 40px;
-    padding: 8px 20px;
-    font-size: 14px;
+    padding: 8px 24px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--primary);
     cursor: pointer;
     font-family: 'Inter', sans-serif;
+    transition: all 0.25s;
   }
 
-  @media (max-width: 768px) {
-    .nav-links {
+  .nav-btn:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 20px var(--primary-glow);
+  }
+
+  @media (max-width: 900px) {
+    .nav-right .nav-link {
       display: none;
     }
-    .menu-toggle {
-      display: block;
+    .nav-functions {
+      gap: 6px;
+      padding: 4px 8px;
+    }
+    .func-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .func-btn i {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .nav-functions {
+      position: absolute;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 0;
+      justify-content: center;
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .func-btn {
+      padding: 8px 16px;
+    }
+    body {
+      padding-top: 0;
     }
   }
 
@@ -427,16 +504,26 @@
 <body>
 
 <nav class="navbar">
-  <a href="#" class="logo">
+  <a href="index.html" class="logo">
     <div class="logo-mark"><i class="fas fa-brain"></i></div>
     <div class="logo-type">Mind<span>Map</span></div>
   </a>
-  <div class="nav-links">
-    <a href="#" class="nav-link"><i class="fas fa-home"></i> Trang chủ</a>
-    <a href="#" class="nav-link"><i class="fas fa-project-diagram"></i> Mindmap</a>
-    <a href="#" class="nav-link"><i class="fas fa-download"></i> Xuất bản</a>
+  <!-- THANH CHỨC NĂNG: TRANG CHỦ, MINDMAP, CHATBOT AI (GIỐNG HỆT TRANG CHỦ) -->
+  <div class="nav-functions">
+    <a href="index.html" class="func-btn">
+      <i class="fas fa-home"></i> Trang chủ
+    </a>
+    <a href="mindmap.html" class="func-btn active">
+      <i class="fas fa-project-diagram"></i> Mindmap
+    </a>
+    <a href=".html" class="func-btn">
+      <i class="fas fa-comment-dots"></i> Chatbot AI
+    </a>
   </div>
-  <button class="menu-toggle" id="mobileMenuBtn"><i class="fas fa-bars"></i> Menu</button>
+  <div class="nav-right">
+    <a href="#" class="nav-link"><i class="fas fa-download"></i> Xuất bản</a>
+    <button class="nav-btn" id="downloadMindmapNavBtn"><i class="fas fa-download"></i> Tải AIVA.zip</button>
+  </div>
 </nav>
 
 <div class="container">
@@ -478,6 +565,16 @@
   function getAPIKey() {
     const original = "v6xGqEar3C7yKR9K2GmO5dTZx2OLCg258qLWdF5o7kt5ImQu-ks";
     return original.split('').reverse().join('');
+  }
+
+  function triggerDownloadZip() {
+    const link = document.createElement('a');
+    link.href = 'aiva.zip';
+    link.download = 'aiva.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("📦 Đang tải AIVA.zip...", 2000);
   }
 
   const API_BASE = "https://api.shopaikey.com/v1";
@@ -732,6 +829,14 @@ Hãy tạo mindmap xuất sắc cho chủ đề: "{{TOPIC}}"`;
     const resetBtn = document.getElementById('resetBtn');
     const downloadSvg = document.getElementById('downloadSvgBtn');
     const downloadMd = document.getElementById('downloadMdBtn');
+    const downloadNavBtn = document.getElementById('downloadMindmapNavBtn');
+
+    if (downloadNavBtn) {
+      downloadNavBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerDownloadZip();
+      });
+    }
 
     generateBtn.addEventListener('click', () => {
       const val = topicInput.value.trim();
